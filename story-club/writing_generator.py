@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import datetime as dt
+import base64
 # import streamlit.components.v1 as components
 def main():
     st.title('Interstellar Story Club Category Generator')
@@ -12,6 +13,13 @@ def main():
     odds_2000 = 0.2
     odds_2500 = 0.05
     odds_3000 = 0.05
+
+    def get_image_download_link(img_path):
+        with open(img_path, "rb") as f:
+            data = f.read()
+        b64 = base64.b64encode(data).decode()
+        return f'<img src="data:image/gif;base64,{b64}" width="400">'
+
 
     st.info(f'Odds of story length are {odds_500*100}% for 500 words, {odds_1000*100}% each for 1000 and '
             f'1500, {odds_2000*100}% for 2000 words, and {odds_2500*100}% each for 2500 and 3000 words. '
@@ -71,6 +79,6 @@ def main():
 
     st.write(f"Word Count = {word_count} and it is due {due_date}")
 
-    st.image(image)
+    st.markdown(get_image_download_link(image), unsafe_allow_html=True)
 if __name__ == '__main__':
     main()
