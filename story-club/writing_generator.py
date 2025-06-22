@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import base64
+from pathlib import Path
+
 # import streamlit.components.v1 as components
 def main():
     st.title('Interstellar Story Club Category Generator')
@@ -79,6 +81,6 @@ def main():
 
     st.write(f"Word Count = {word_count} and it is due {due_date}")
 
-    st.markdown(get_image_download_link(image), unsafe_allow_html=True)
+    st.markdown(get_image_download_link(Path(__file__).parent / image), unsafe_allow_html=True)
 if __name__ == '__main__':
     main()
