@@ -20,7 +20,7 @@ def main():
     randomize = st.button('Randomize')
     member_list = ['Alvaro','Elijah','Favier','Raffy']
 
-    image = 'gifs/tars.gif'
+    image = 'tars.gif'
 
     object = ''
     emotion = ''
@@ -40,22 +40,22 @@ def main():
         rand = np.random.random()
         if rand < odds_500:
             word_count = 500
-            image = 'gifs/blackhole.gif'
+            image = 'blackhole.gif'
         elif rand >= odds_500 and rand < odds_500 + odds_1000:
             word_count = 1000
-            image = 'gifs/necessary.gif'
+            image = 'necessary.gif'
         elif rand >= odds_500 + odds_1000 and rand < odds_500 + odds_1000 + odds_1500:
             word_count = 1500
-            image = 'gifs/yes.gif'
+            image = 'yes.gif'
         elif rand >= odds_500 + odds_1000 + odds_1500 and rand < odds_500 + odds_1000 + odds_1500 + odds_2000:
             word_count = 2000
-            image = 'gifs/humor.gif'
+            image = 'humor.gif'
         elif rand >= odds_500 + odds_1000 + odds_1500 + odds_2000 and rand < odds_500 + odds_1000 + odds_1500 + odds_2000 + odds_2500:
             word_count = 2500
-            image = 'gifs/interstellar-cost.gif'
+            image = 'interstellar-cost.gif'
         else:
             word_count = 3000
-            image = 'gifs/crying.gif'
+            image = 'crying.gif'
 
         days_to_add = dt.timedelta(days=(word_count/100)+1)
 
