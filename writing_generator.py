@@ -4,7 +4,7 @@ import pandas as pd
 import datetime as dt
 # import streamlit.components.v1 as components
 def main():
-    st.title('Category Generator')
+    st.title('Interstellar Story Club Category Generator')
 
     odds_500 = 0.1
     odds_1000 = 0.3
@@ -19,6 +19,8 @@ def main():
 
     randomize = st.button('Randomize')
     member_list = ['Alvaro','Elijah','Favier','Raffy']
+
+    image = 'tars.gif'
 
     object = ''
     emotion = ''
@@ -63,12 +65,19 @@ def main():
 
     st.write(f"Word Count = {word_count} and it is due {due_date}")
 
+    if word_count == 500:
+        image = 'blackhole.gif'
+    elif word_count == 1000:
+        image = 'necessary.gif'
+    elif word_count == 1500:
+        image = 'yes.gif'
+    elif word_count == 2000:
+        image = 'humor.gif'
+    elif word_count == 2500:
+        image = 'interstellar-cost.gif'
+    elif word_count == 3000:
+        image = 'crying.gif'
 
-
-
-
-
-
-
+    st.image(image)
 if __name__ == '__main__':
     main()
