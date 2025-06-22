@@ -1,5 +1,3 @@
-from idlelib.configdialog import font_sample_text
-
 import streamlit as st
 import numpy as np
 import pandas as pd
