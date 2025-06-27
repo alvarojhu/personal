@@ -21,7 +21,6 @@ max_due_date = dt.datetime.strptime(max_data.loc[max_upload_number, 'due_date'],
 days_left = max_due_date - today
 
 st.header(f'You have {days_left.days} days left to write your story!')
-
 st.subheader(f'Your story is due {max_data.loc[max_upload_number, 'due_date']}')
 
 if pd.isna(max_data.loc[max_upload_number,'object_selected']) or pd.isna(max_data.loc[max_upload_number,'emotion_selected'] or
