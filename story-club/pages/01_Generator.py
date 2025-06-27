@@ -10,7 +10,10 @@ parent_folder = Path(__file__).parent.parent
 columns_to_get = ['upload_number','upload_date','object','action','emotion','setting','word_count','due_date']
 categories_df = pd.read_csv(parent_folder / 'data/story_categories.csv')[columns_to_get]
 categories = ['object','emotion','action','setting']
+password = 'Toto'
 
+if "click_save" not in st.session_state:
+    st.session_state.click_save = False
 
 def get_image_download_link(img_path):
     with open(img_path, "rb") as f:
@@ -77,7 +80,7 @@ def main():
         st.session_state.due_date = due_date
 
     c1,c2 = st.columns(2)
-    with c1:
+    with (c1):
 
         st.write('Object / Noun: {}'.format(st.session_state.object), font = 'Helvetica 16 bold')
 
@@ -91,18 +94,28 @@ def main():
 
         st.warning('WARNING! Do not click "Save Categories" unless you are ready for the next story')
         if st.button('Save Categories'):
-            max_upload = categories_df.upload_number.max()
-            new_row = {'upload_number':max_upload+1,'upload_date': dt.date.today(), 'object': st.session_state.object,
-                       'action': st.session_state.action, 'emotion': st.session_state.emotion,
-                       'setting': st.session_state.setting, 'word_count': st.session_state.word_count,
-                       'due_date':st.session_state.due_date}
-            new_df = pd.DataFrame([new_row])# .reset_index()
+            st.session_state.click_save = True
 
-            updated_df = pd.concat([categories_df, new_df], ignore_index=True)
-            st.table(updated_df)
-            updated_df.to_csv(parent_folder / 'data/story_categories.csv')
-            post_update = pd.read_csv(parent_folder / 'data/story_categories.csv')
-            st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
+        if st.session_state.click_save:
+            user_pass = st.text_input('Enter Password')
+            if user_pass == '':
+                pass
+            elif user_pass == password:
+                max_upload = categories_df.upload_number.max()
+                new_row = {'upload_number':max_upload+1,'upload_date': dt.date.today(), 'object': st.session_state.object,
+                           'action': st.session_state.action, 'emotion': st.session_state.emotion,
+                           'setting': st.session_state.setting, 'word_count': st.session_state.word_count,
+                           'due_date':st.session_state.due_date}
+                new_df = pd.DataFrame([new_row])# .reset_index()
+
+                updated_df = pd.concat([categories_df, new_df], ignore_index=True)
+                st.table(updated_df)
+                updated_df.to_csv(parent_folder / 'data/story_categories.csv')
+                post_update = pd.read_csv(parent_folder / 'data/story_categories.csv')
+                st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
+                st.session_state.click_save = False
+            else:
+                st.write('Incorrect Password. Try Again')
     with c2:
         st.markdown(get_image_download_link(parent_folder / image), unsafe_allow_html=True)
 if __name__ == '__main__':

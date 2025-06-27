@@ -8,6 +8,10 @@ columns_to_get = ['upload_number','upload_date','object','action','emotion','set
 categories_df = pd.read_csv(parent_folder / 'data/story_categories.csv')[columns_to_get]
 selected_df = pd.read_csv(parent_folder / 'data/selected.csv', index_col=0)
 categories = ['object','emotion','action','setting']
+password = 'Toto'
+
+if "save_word" not in st.session_state:
+    st.session_state.save_word = False
 
 # building dataframes
 joined = categories_df.join(selected_df, lsuffix = '_category', rsuffix = '_selected', on = 'upload_number')
@@ -47,7 +51,17 @@ if cat_selection:
         selected_df.loc[max_upload_number,'{}'.format(cat_selection.lower())] = word_selection
 
         if st.button('Save Word'):
-            selected_df.to_csv(parent_folder / 'data/selected.csv')
+            st.session_state.save_word = True
+        if st.session_state.save_word:
+            user_pass = st.text_input('Enter Password')
+            if user_pass == '':
+                pass
+            elif user_pass == password:
+                selected_df.to_csv(parent_folder / 'data/selected.csv')
+                st.write('Word Saved! Check the "Current Story" tab once everyone is done submitting their word.')
+                st.session_state.save_word = False
+            else:
+                st.write('Incorrect Password. Try Again')
 
 
 
