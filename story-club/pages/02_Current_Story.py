@@ -28,8 +28,8 @@ if pd.isna(max_data.loc[max_upload_number,'object_selected']) or pd.isna(max_dat
 else:
     for category in categories:
         st.write('{} chose {} in the {} category'.format(max_data.loc[max_upload_number,f'{category}_category'],
-                                                         max_data.loc[max_upload_number,f'{category}_selected'],
-                                                         category))
+                                                         max_data.loc[max_upload_number,f'{category}_selected'].capitalize(),
+                                                         category.capitalize()))
 
 
 with st.expander('Click to Show Previous Choices'):
