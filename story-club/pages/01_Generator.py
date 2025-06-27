@@ -11,6 +11,13 @@ columns_to_get = ['upload_number','upload_date','object','action','emotion','set
 categories_df = pd.read_csv(parent_folder / 'data/story_categories.csv')[columns_to_get]
 categories = ['object','emotion','action','setting']
 
+
+def get_image_download_link(img_path):
+    with open(img_path, "rb") as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
+    return f'<img src="data:image/gif;base64,{b64}" width="400">'
+
 def main():
     st.title('Interstellar Story Club Category Generator')
 
@@ -20,12 +27,6 @@ def main():
     odds_2000 = 0.2
     odds_2500 = 0.05
     odds_3000 = 0.05
-
-    def get_image_download_link(img_path):
-        with open(img_path, "rb") as f:
-            data = f.read()
-        b64 = base64.b64encode(data).decode()
-        return f'<img src="data:image/gif;base64,{b64}" width="400">'
 
     with st.expander('Story Length Odds'):
         st.info(f'Odds of story length are {odds_500*100}% for 500 words, {odds_1000*100}% each for 1000 and '
@@ -75,31 +76,34 @@ def main():
         due_date = dt.date.today() + days_to_add
         st.session_state.due_date = due_date
 
-    st.write('Object / Noun: {}'.format(st.session_state.object), font = 'Helvetica 16 bold')
+    c1,c2 = st.columns(2)
+    with c1:
 
-    st.write('Emotion: {}'.format(st.session_state.emotion))
+        st.write('Object / Noun: {}'.format(st.session_state.object), font = 'Helvetica 16 bold')
 
-    st.write('Action / Verb: {}'.format(st.session_state.action))
+        st.write('Emotion: {}'.format(st.session_state.emotion))
 
-    st.write('Setting / Location: {}'.format(st.session_state.setting))
+        st.write('Action / Verb: {}'.format(st.session_state.action))
 
-    st.write(f"Word Count = {st.session_state.word_count} and it is due {st.session_state.due_date}")
+        st.write('Setting / Location: {}'.format(st.session_state.setting))
 
-    st.warning('WARNING! Do not click "Save Categories" unless you are ready for the next story')
-    if st.button('Save Categories'):
-        max_upload = categories_df.upload_number.max()
-        new_row = {'upload_number':max_upload+1,'upload_date': dt.date.today(), 'object': st.session_state.object,
-                   'action': st.session_state.action, 'emotion': st.session_state.emotion,
-                   'setting': st.session_state.setting, 'word_count': st.session_state.word_count,
-                   'due_date':st.session_state.due_date}
-        new_df = pd.DataFrame([new_row])# .reset_index()
+        st.write(f"Word Count = {st.session_state.word_count} and it is due {st.session_state.due_date}")
 
-        updated_df = pd.concat([categories_df, new_df], ignore_index=True)
-        st.table(updated_df)
-        updated_df.to_csv(parent_folder / 'data/story_categories.csv')
-        post_update = pd.read_csv(parent_folder / 'data/story_categories.csv')
-        st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
+        st.warning('WARNING! Do not click "Save Categories" unless you are ready for the next story')
+        if st.button('Save Categories'):
+            max_upload = categories_df.upload_number.max()
+            new_row = {'upload_number':max_upload+1,'upload_date': dt.date.today(), 'object': st.session_state.object,
+                       'action': st.session_state.action, 'emotion': st.session_state.emotion,
+                       'setting': st.session_state.setting, 'word_count': st.session_state.word_count,
+                       'due_date':st.session_state.due_date}
+            new_df = pd.DataFrame([new_row])# .reset_index()
 
-    st.markdown(get_image_download_link(parent_folder / image), unsafe_allow_html=True)
+            updated_df = pd.concat([categories_df, new_df], ignore_index=True)
+            st.table(updated_df)
+            updated_df.to_csv(parent_folder / 'data/story_categories.csv')
+            post_update = pd.read_csv(parent_folder / 'data/story_categories.csv')
+            st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
+    with c2:
+        st.markdown(get_image_download_link(parent_folder / image), unsafe_allow_html=True)
 if __name__ == '__main__':
     main()
