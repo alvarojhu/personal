@@ -2,12 +2,37 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 import datetime as dt
+import gspread
+from google.oauth2 import service_account
 
-parent_folder = Path(__file__).parent.parent
 columns_to_get = ['upload_number','upload_date','object','action','emotion','setting','word_count','due_date']
-categories_df = pd.read_csv(parent_folder / 'data/story_categories.csv')[columns_to_get]
-selected_df = pd.read_csv(parent_folder / 'data/selected.csv', index_col=0)
 categories = ['object','emotion','action','setting']
+
+# Set up credentials and Drive API
+SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-05ab670db57d.json'  # Upload this to your app directory
+SHEET_NAME = 'data'
+WORKSHEET_NAME_GEN = 'generated'  # Usually Sheet1 unless renamed
+WORKSHEET_NAME_CHOSE = 'chosen'
+
+# Auth and connect
+@st.cache_resource
+def connect_to_gsheet(worksheet_name):
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
+        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    )
+    gc = gspread.authorize(creds)
+    sh = gc.open(SHEET_NAME)
+    return sh.worksheet(worksheet_name)
+
+sheet_gen = connect_to_gsheet(WORKSHEET_NAME_GEN)
+sheet_chose = connect_to_gsheet(WORKSHEET_NAME_CHOSE)
+
+data_gen = sheet_gen.get_all_records()
+data_chose = sheet_chose.get_all_records()
+
+categories_df = pd.DataFrame(data_gen)[columns_to_get]
+selected_df = pd.DataFrame(data_chose)
 
 today = dt.date.today()
 

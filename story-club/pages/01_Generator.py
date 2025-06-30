@@ -4,13 +4,38 @@ import pandas as pd
 import datetime as dt
 import base64
 from pathlib import Path
+import gspread
+from google.oauth2 import service_account
 
 # Initializing values
 parent_folder = Path(__file__).parent.parent
 columns_to_get = ['upload_number','upload_date','object','action','emotion','setting','word_count','due_date']
-categories_df = pd.read_csv(parent_folder / 'data/story_categories.csv')[columns_to_get]
 categories = ['object','emotion','action','setting']
 password = 'Toto'
+
+# Set up credentials and Drive API
+SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-05ab670db57d.json'  # Upload this to your app directory
+SHEET_NAME = 'data'
+WORKSHEET_NAME = 'generated'  # Usually Sheet1 unless renamed
+
+# Auth and connect
+@st.cache_resource
+def connect_to_gsheet():
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
+        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    )
+    gc = gspread.authorize(creds)
+    sh = gc.open(SHEET_NAME)
+    return sh.worksheet(WORKSHEET_NAME)
+
+sheet = connect_to_gsheet()
+
+# Read as DataFrame
+data = sheet.get_all_records()
+categories_df = pd.DataFrame(data)[columns_to_get]
+
+st.table(categories_df)
 
 if "click_save" not in st.session_state:
     st.session_state.click_save = False
@@ -22,7 +47,7 @@ def get_image_download_link(img_path):
     return f'<img src="data:image/gif;base64,{b64}" width="400">'
 
 def main():
-    st.title('Interstellar Story Club Category Generator')
+    st.title("Interstellar Writer's Club Category Generator")
 
     odds_500 = 0.1
     odds_1000 = 0.3
@@ -106,14 +131,13 @@ def main():
                            'action': st.session_state.action, 'emotion': st.session_state.emotion,
                            'setting': st.session_state.setting, 'word_count': st.session_state.word_count,
                            'due_date':st.session_state.due_date}
-                new_df = pd.DataFrame([new_row])# .reset_index()
+                try:
+                    sheet.append_row([str(value) for value in new_row.values()])
+                    st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
+                    st.session_state.click_save = False
+                except Exception as e:
+                    st.error(f"Failed to add row: {e}")
 
-                updated_df = pd.concat([categories_df, new_df], ignore_index=True)
-                st.table(updated_df)
-                updated_df.to_csv(parent_folder / 'data/story_categories.csv')
-                post_update = pd.read_csv(parent_folder / 'data/story_categories.csv')
-                st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
-                st.session_state.click_save = False
             else:
                 st.write('Incorrect Password. Try Again')
     with c2:

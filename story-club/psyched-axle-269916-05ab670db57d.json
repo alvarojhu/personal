@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "psyched-axle-269916",
+  "private_key_id": "05ab670db57dfc7388253b949a71a0281e309463",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCW9RrMEY4RKr7p\nxiSe1vmOmmUPSVu+OlnusgoQPXy8O4xPQkEfgK4P6JLhT1nuZAIbGb+TSFMNj3CC\nC+fqBNHJG9WfSzSF7TBG24mTsFw3oCfJH+ed5vorF4pCpuMOp4DOPodDIc3jSiL2\nfL559oM9nMGX97QaX92SAiNbQrAjbYBovNVbZbn07bp3QM7BavecODDb1QCiWpmN\nZWg69nInaX8zktSFrH7jsr4v2K+3L6fb4BlJK7xPjG58Z5Jjy1mb90/gFrDOhHh2\nOiruBIYmO4x4vEjvST/9ZY5bssDg1UksMLQO8cGqeaTrkWiE53vJsTlFCwHDEWbM\nLCgc3ZXZAgMBAAECggEAAOp903fWd9jdjbJBGKGkpAPgfHDtLetRY7cQLpG2RwzJ\nc4BVwCjaEDNQvi3qwB06kgrcSbrU84PHoqe11uAD8dzJtWIRxdpEQmR595EeDiGv\npshwca8sHMTTdvISS014OkgmLqHENmPbGx8d/MQifxDgxS5LQ88JxiVd145BCVtS\nBSo3VpSUDWml3jAddyptETqOzFgGSd7XsmOdwyA5nek0oVIuMUFyAV1JCB56aJ4h\nj9u07GGjSlqHaeZ+oovE9/tmTZVyHB0AUu1fSDF7UGycU23rOwrx6I7JHlJeG4KS\nMqv6v12YLG7wSEIZCoIJI7JV76pS/CJ0qShkOs7JbQKBgQDNUJH9EilxCXlhC3d3\nhspWU0dX0ssfooVdvOCJ3lSlpulE3ZzB2RU8bbCeXaelEgmRusJJtrQHHvGtteFc\n53HnCEPgye8MSaiIwYQ1519yzvqTzd+PF/cHy7VUWklzHJvBKxwXW9FB/+HS9r6H\n0dxaakGGexT+5kTrNNdXx4W/uwKBgQC8OUahsqaGud0Zy4Ca22voGwveP6hDxqs9\nKt9TegnS2hjg8ahG93/qmoPoaZMySBm9TEon7KlGCk9ebwhVAOrRzFQwcDpLUiVB\n8CHCPAOYcbI38bt4M+is0cBQd8OVFmc2F0h8gR+CAklAIFq7ZpoOcnFv1nQyolzQ\n0M5y3E51ewKBgQCpWNORkfFsswvS58paZGtwWLB31/6C0WJ/ttLd5Oyc1deCXeh2\nW8AQX8lWVpl4pjAOa6TleDV1yig9x89i+eQRU9fpCaaK1BaW9kc+zuEDqYU1dJH5\nTSMM4xFlyjLbJ7Ww1wYMnkcz0QNLJwpwrMC8MvhpHAxtUzF1b9hPJttDEQKBgQCV\n1tLPrrS61AOboVGD9eF1KPLNvsdpDSMM0rBud9ySKmVbzYU02ZrPXKpdvo4bnSJA\nfBccqV4oD9UXTDTJ1q0YzxzGYtFFXOOkFlIJmlUSapCB0MJ48nnr+h6q8GyWpvsL\nKIXf97rpeIBvuFICla9WiOydJ4/hLzfMVC3FanRbOQKBgDxUU6auWDJzw6sn9LCz\nllJn638ZHT5mYLS9x9NcsmeXkAXRooTZquzHnEE6f2EYkPGa3lsDY/t93lM0KEhH\ndwTXpBV+Y9DKLQmyn5tRRUbvAL9f7qW+mkYnU8U0f+QsGJwVQs/YQS+IyG+UTMJE\nX//bD5yiqFpVR23zTdVM5tGd\n-----END PRIVATE KEY-----\n",
+  "client_email": "interstellar-guild@psyched-axle-269916.iam.gserviceaccount.com",
+  "client_id": "107989186314311644288",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/interstellar-guild%40psyched-axle-269916.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
