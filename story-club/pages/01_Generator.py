@@ -41,8 +41,6 @@ sheet = connect_to_gsheet()
 data = sheet.get_all_records()
 categories_df = pd.DataFrame(data)[columns_to_get]
 
-st.table(categories_df)
-
 if "click_save" not in st.session_state:
     st.session_state.click_save = False
 
@@ -53,7 +51,7 @@ def get_image_download_link(img_path):
     return f'<img src="data:image/gif;base64,{b64}" width="400">'
 
 def main():
-    st.title("Interstellar Writer's Club Category Generator")
+    st.title("Category Generator")
 
     odds_500 = 0.1
     odds_1000 = 0.3
