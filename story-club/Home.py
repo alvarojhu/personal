@@ -3,6 +3,7 @@ from pathlib import Path
 import base64
 
 parent_folder = Path(__file__).parent
+st.set_page_config(page_title="🌌 Welcome",page_icon = '🌌')
 
 def get_image_download_link(img_path):
     with open(img_path, "rb") as f:
