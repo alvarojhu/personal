@@ -11,10 +11,16 @@ FOLDER_ID = '1zZtfu-f6EyD93gTUOhNgY2K7ofYEOPaU'  # The ID of the shared Google D
 
 @st.cache_resource
 def get_drive_service():
-    creds = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
-        scopes=['https://www.googleapis.com/auth/drive']
+    # Uncomment for Local Development
+    # creds = service_account.Credentials.from_service_account_file(
+    #     SERVICE_ACCOUNT_FILE,
+    #     scopes=['https://www.googleapis.com/auth/drive']
+    # )
+    # Uncomment for Deployed
+    creds = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"]
     )
+
     return build('drive', 'v3', credentials=creds)
 
 # Streamlit UI

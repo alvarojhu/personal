@@ -17,9 +17,14 @@ WORKSHEET_NAME_CHOSE = 'chosen'
 # Auth and connect
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
-    creds = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
-        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    # Uncomment for Local Development
+    # creds = service_account.Credentials.from_service_account_file(
+    #     SERVICE_ACCOUNT_FILE,
+    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    # )
+    # Uncomment for Deployed
+    creds = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"]
     )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
