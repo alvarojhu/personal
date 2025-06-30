@@ -31,7 +31,13 @@ def get_drive_service():
     return build('drive', 'v3', credentials=creds)
 
 # Streamlit UI
-st.title("📄 Upload Your Story Anonymously Here")
+st.title("Upload Your Story Anonymously Here")
+
+st.header("You're finally ready to submit your Story!")
+
+url = 'https://drive.google.com/drive/u/1/folders/1zZtfu-f6EyD93gTUOhNgY2K7ofYEOPaU'
+
+st.markdown(f"You can view all story submissions [here]({url})", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("Choose a file to upload")
 
