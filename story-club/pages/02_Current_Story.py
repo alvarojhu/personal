@@ -9,7 +9,7 @@ columns_to_get = ['upload_number','upload_date','object','action','emotion','set
 categories = ['object','emotion','action','setting']
 
 # Set up credentials and Drive API
-SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-05ab670db57d.json'  # Upload this to your app directory
+SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-e61ccb85d72c.json'  # Upload this to your app directory
 SHEET_NAME = 'data'
 WORKSHEET_NAME_GEN = 'generated'  # Usually Sheet1 unless renamed
 WORKSHEET_NAME_CHOSE = 'chosen'
@@ -54,8 +54,8 @@ days_left = max_due_date - today
 st.header(f'You have {days_left.days} days left to write your story!')
 st.subheader(f'Your story is due {max_data.loc[max_upload_number, 'due_date']}')
 
-if pd.isna(max_data.loc[max_upload_number,'object_selected']) or pd.isna(max_data.loc[max_upload_number,'emotion_selected'] or
-         pd.isna(max_data.loc[max_upload_number,'action_selected']) or pd.isna(max_data.loc[max_upload_number,'setting_selected'])):
+if max_data.loc[max_upload_number,'object_selected'] == '' or max_data.loc[max_upload_number,'emotion_selected'] == ''\
+         or max_data.loc[max_upload_number,'action_selected'] == '' or max_data.loc[max_upload_number,'setting_selected'] == '':
     st.write("Not everyone has chosen words for their selected Category. Please return when that is done!")
 else:
     for category in categories:

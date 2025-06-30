@@ -10,7 +10,7 @@ import gspread
 from google.oauth2 import service_account
 
 # Set up credentials and Drive API
-SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-05ab670db57d.json'  # Upload this to your app directory
+SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-e61ccb85d72c.json'  # Upload this to your app directory
 SHEET_NAME = 'data'
 WORKSHEET_NAME_GEN = 'generated'  # Usually Sheet1 unless renamed
 WORKSHEET_NAME_CHOSE = 'chosen'
