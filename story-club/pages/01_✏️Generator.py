@@ -7,6 +7,7 @@ from pathlib import Path
 import gspread
 from google.oauth2 import service_account
 
+st.set_page_config(page_icon = '🌌')
 # Initializing values
 parent_folder = Path(__file__).parent.parent
 columns_to_get = ['upload_number','upload_date','object','action','emotion','setting','word_count','due_date']

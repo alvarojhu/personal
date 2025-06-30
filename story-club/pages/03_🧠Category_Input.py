@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
+st.set_page_config(page_icon = '🌌')
+
 # Initialization
 columns_to_get = ['upload_number','upload_date','object','action','emotion','setting','word_count','due_date']
 categories = ['object','emotion','action','setting']

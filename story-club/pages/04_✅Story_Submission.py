@@ -5,6 +5,12 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
+st.set_page_config(page_icon = '🌌')
+
+if "submit_story" not in st.session_state:
+    st.session_state.submit_story = False
+password = 'Toto'
+
 # Set up credentials and Drive API
 SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-e61ccb85d72c.json'  # Upload this to your app directory
 FOLDER_ID = '1zZtfu-f6EyD93gTUOhNgY2K7ofYEOPaU'  # The ID of the shared Google Drive folder
@@ -32,23 +38,32 @@ uploaded_file = st.file_uploader("Choose a file to upload")
 if uploaded_file:
     st.success(f"File `{uploaded_file.name}` ready to upload.")
     if st.button("Upload to Google Drive"):
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-            tmp_file.write(uploaded_file.read())
-            temp_file_path = tmp_file.name
+        st.session_state.submit_story = True
+    if st.session_state.submit_story:
+        user_pass = st.text_input('Enter Password')
+        if user_pass == '':
+            pass
+        elif user_pass == password:
+            with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+                tmp_file.write(uploaded_file.read())
+                temp_file_path = tmp_file.name
 
-        try:
-            service = get_drive_service()
-            file_metadata = {
-                'name': uploaded_file.name,
-                'parents': [FOLDER_ID]
-            }
-            media = MediaFileUpload(temp_file_path, resumable=True)
-            file = service.files().create(
-                body=file_metadata,
-                media_body=media,
-                fields='id'
-            ).execute()
-            st.success(f"Upload successful! File ID: {file.get('id')}")
-        except Exception as e:
-            st.error(f"Upload failed: {e}")
+            try:
+                service = get_drive_service()
+                file_metadata = {
+                    'name': uploaded_file.name,
+                    'parents': [FOLDER_ID]
+                }
+                media = MediaFileUpload(temp_file_path, resumable=True)
+                file = service.files().create(
+                    body=file_metadata,
+                    media_body=media,
+                    fields='id'
+                ).execute()
+                st.success(f"Upload successful! File ID: {file.get('id')}")
+            except Exception as e:
+                st.error(f"Upload failed: {e}")
+        else:
+            st.write('Incorrect Password. Try Again')
+
 

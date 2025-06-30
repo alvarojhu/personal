@@ -5,6 +5,8 @@ import datetime as dt
 import gspread
 from google.oauth2 import service_account
 
+st.set_page_config(page_icon = '🌌')
+
 columns_to_get = ['upload_number','upload_date','object','action','emotion','setting','word_count','due_date']
 categories = ['object','emotion','action','setting']
 
