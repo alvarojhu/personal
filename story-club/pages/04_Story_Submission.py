@@ -18,7 +18,8 @@ def get_drive_service():
     # )
     # Uncomment for Deployed
     creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"]
+        st.secrets["gcp_service_account"],
+        scopes=['https://www.googleapis.com/auth/drive']
     )
 
     return build('drive', 'v3', credentials=creds)

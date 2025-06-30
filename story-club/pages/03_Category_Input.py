@@ -25,7 +25,8 @@ def connect_to_gsheet(worksheet_name):
     # )
     # Uncomment for Deployed
     creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"]
+        st.secrets["gcp_service_account"],
+        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
     )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
