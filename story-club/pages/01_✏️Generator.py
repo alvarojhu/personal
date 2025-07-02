@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import datetime as dt
+import random
 import base64
 from pathlib import Path
 import gspread
@@ -23,15 +24,15 @@ WORKSHEET_NAME = 'generated'  # Usually Sheet1 unless renamed
 @st.cache_resource
 def connect_to_gsheet():
     # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    # )
-    # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
         scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
     )
+    # Uncomment for Deployed
+    # creds = service_account.Credentials.from_service_account_info(
+    #     st.secrets["gcp_service_account"],
+    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    # )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(WORKSHEET_NAME)
@@ -42,6 +43,8 @@ sheet = connect_to_gsheet()
 data = sheet.get_all_records()
 categories_df = pd.DataFrame(data)[columns_to_get]
 
+max_upload = categories_df.upload_number.max()
+
 if "click_save" not in st.session_state:
     st.session_state.click_save = False
 
@@ -50,6 +53,15 @@ def get_image_download_link(img_path):
         data = f.read()
     b64 = base64.b64encode(data).decode()
     return f'<img src="data:image/gif;base64,{b64}" width="400">'
+
+def shuffle_avoiding_fixed_points(prev, members):
+    """Return a shuffled version of `prev` where
+       no element remains in the same index."""
+    while True:
+        new = members  # copy
+        random.shuffle(new)
+        if all(a != b for a, b in zip(new, prev)):
+            return new
 
 def main():
     st.title("Category Generator")
@@ -79,10 +91,15 @@ def main():
     if st.button('Randomize'):
 
         st.session_state.message = "Update"
-        np.random.shuffle(member_list)
 
-        for category, i in zip(categories, np.arange(0,len(member_list))):
-            st.session_state[category] = member_list[i]
+        prev = []
+        for category in categories:
+            prev.append(categories_df.loc[max_upload, category])
+
+        new_list = shuffle_avoiding_fixed_points(prev, member_list)
+
+        for category, i in zip(categories, np.arange(0,len(new_list))):
+            st.session_state[category] = new_list[i]
 
         rand = np.random.random()
         if rand < odds_500:
@@ -131,7 +148,6 @@ def main():
             if user_pass == '':
                 pass
             elif user_pass == password:
-                max_upload = categories_df.upload_number.max()
                 new_row = {'upload_number':max_upload+1,'upload_date': dt.date.today(), 'object': st.session_state.object,
                            'action': st.session_state.action, 'emotion': st.session_state.emotion,
                            'setting': st.session_state.setting, 'word_count': st.session_state.word_count,
