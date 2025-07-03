@@ -24,15 +24,15 @@ WORKSHEET_NAME = 'generated'  # Usually Sheet1 unless renamed
 @st.cache_resource
 def connect_to_gsheet():
     # Uncomment for Local Development
-    creds = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
-        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    )
-    # Uncomment for Deployed
-    # creds = service_account.Credentials.from_service_account_info(
-    #     st.secrets["gcp_service_account"],
+    # creds = service_account.Credentials.from_service_account_file(
+    #     SERVICE_ACCOUNT_FILE,
     #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
     # )
+    # Uncomment for Deployed
+    creds = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(WORKSHEET_NAME)
@@ -67,15 +67,15 @@ def main():
     st.title("Category Generator")
 
     odds_500 = 0.1
-    odds_1000 = 0.3
-    odds_1500 = 0.3
+    odds_1000 = 0.2
+    odds_1500 = 0.35
     odds_2000 = 0.2
-    odds_2500 = 0.05
+    odds_2500 = 0.1
     odds_3000 = 0.05
 
     with st.expander('Story Length Odds'):
-        st.info(f'Odds of story length are {odds_500*100}% for 500 words, {odds_1000*100}% each for 1000 and '
-                f'1500, {odds_2000*100}% for 2000 words, and {odds_2500*100}% each for 2500 and 3000 words. '
+        st.info(f'Odds of story length are {odds_500*100}% for 500 words, {odds_1000*100}% for 1000,  '
+                f'{odds_1500*100}% for 1500, {odds_2000*100}% for 2000 words, {odds_2500*100}% for 2500, and {odds_3000*100}% for 3000 words. '
                 'There are 5 Days assigned per 100 words of story selected. ')
 
     member_list = ['Alvaro', 'Elijah', 'Favier', 'Raffy']
@@ -129,7 +129,7 @@ def main():
     c1,c2 = st.columns(2)
     with (c1):
 
-        st.write('Object / Noun: {}'.format(st.session_state.object), font = 'Helvetica 16 bold')
+        st.write('Object / Noun: {}'.format(st.session_state.object))
 
         st.write('Emotion: {}'.format(st.session_state.emotion))
 

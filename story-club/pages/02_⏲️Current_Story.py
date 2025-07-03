@@ -56,9 +56,13 @@ days_left = max_due_date - today
 st.header(f'You have {days_left.days} days left to write your story!')
 st.subheader(f'Your story is due {max_data.loc[max_upload_number, 'due_date']}')
 
-if max_data.loc[max_upload_number,'object_selected'] == '' or max_data.loc[max_upload_number,'emotion_selected'] == ''\
-         or max_data.loc[max_upload_number,'action_selected'] == '' or max_data.loc[max_upload_number,'setting_selected'] == '':
+if pd.isna(max_data.loc[max_upload_number,'object_selected']) or pd.isna(max_data.loc[max_upload_number,'emotion_selected'])\
+         or pd.isna(max_data.loc[max_upload_number,'action_selected']) or pd.isna(max_data.loc[max_upload_number,'setting_selected']):
     st.write("Not everyone has chosen words for their selected Category. Please return when that is done!")
+    st.write('For this story:')
+    for category in categories:
+        st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{} is choosing in the {} category".format(max_data.loc[max_upload_number, f'{category}_category'],
+                                                     category.capitalize()))
 else:
     for category in categories:
         st.write('{} chose {} in the {} category'.format(max_data.loc[max_upload_number,f'{category}_category'],
