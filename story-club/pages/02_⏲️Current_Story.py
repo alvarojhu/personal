@@ -26,12 +26,13 @@ def connect_to_gsheet(worksheet_name):
     # )
     # Uncomment for Deployed
     creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    )
+            st.secrets["gcp_service_account"],
+            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+        )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(worksheet_name)
+
 
 sheet_gen = connect_to_gsheet(WORKSHEET_NAME_GEN)
 sheet_chose = connect_to_gsheet(WORKSHEET_NAME_CHOSE)
@@ -56,8 +57,8 @@ days_left = max_due_date - today
 st.header(f'You have {days_left.days} days left to write your story!')
 st.subheader(f'Your story is due {max_data.loc[max_upload_number, 'due_date']}')
 
-if pd.isna(max_data.loc[max_upload_number,'object_selected']) or pd.isna(max_data.loc[max_upload_number,'emotion_selected'])\
-         or pd.isna(max_data.loc[max_upload_number,'action_selected']) or pd.isna(max_data.loc[max_upload_number,'setting_selected']):
+if max_data.loc[max_upload_number,'object_selected'] == '' or max_data.loc[max_upload_number,'emotion_selected'] == ''\
+         or max_data.loc[max_upload_number,'action_selected'] == '' or max_data.loc[max_upload_number,'setting_selected'] == '':
     st.write("Not everyone has chosen words for their selected Category. Please return when that is done!")
     st.write('For this story:')
     for category in categories:
