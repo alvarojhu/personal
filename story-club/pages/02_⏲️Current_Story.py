@@ -20,15 +20,15 @@ WORKSHEET_NAME_CHOSE = 'chosen'
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
     # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    # )
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
+        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    )
     # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
-            st.secrets["gcp_service_account"],
-            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-        )
+    # creds = service_account.Credentials.from_service_account_info(
+    #         st.secrets["gcp_service_account"],
+    #         scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    #     )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(worksheet_name)
@@ -48,17 +48,34 @@ today = dt.date.today()
 joined = categories_df.join(selected_df, lsuffix = '_category', rsuffix = '_selected', on = 'upload_number')
 
 max_upload_number = joined["upload_number_category"].max()
+max_upload_date = joined["upload_date_category"].max()
 
 max_data = joined[joined["upload_number_category"] == max_upload_number]
 
 max_due_date = dt.datetime.strptime(max_data.loc[max_upload_number, 'due_date'], "%Y-%m-%d").date()
 days_left = max_due_date - today
 
+# add a row to selected_df if it doesn't exist yet
+if max_upload_number not in (selected_df.upload_number):
+    # selected_df.loc[max_upload_number] = {"upload_number": max_upload_number, 'upload_date': max_upload_date}
+    new_row = {"upload_number": max_upload_number, 'upload_date': max_upload_date}
+
+    sheet_chose.append_row([str(value) for value in new_row.values()])
+
 st.header(f'You have {days_left.days} days left to write your story!')
-st.subheader(f'Your story is due {max_data.loc[max_upload_number, 'due_date']}')
+st.subheader(f'Your story is due {max_data.loc[max_upload_number, 'due_date']} and '
+             f'should be between {round(max_data.loc[max_upload_number, 'word_count']-max_data.loc[max_upload_number, 'word_count']/10)} and'
+             f' {round(max_data.loc[max_upload_number, 'word_count']+max_data.loc[max_upload_number, 'word_count']/10)} words long')
 
 if max_data.loc[max_upload_number,'object_selected'] == '' or max_data.loc[max_upload_number,'emotion_selected'] == ''\
          or max_data.loc[max_upload_number,'action_selected'] == '' or max_data.loc[max_upload_number,'setting_selected'] == '':
+    st.write("Not everyone has chosen words for their selected Category. Please return when that is done!")
+    st.write('For this story:')
+    for category in categories:
+        st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{} is choosing in the {} category".format(max_data.loc[max_upload_number, f'{category}_category'],
+                                                     category.capitalize()))
+elif pd.isna(max_data.loc[max_upload_number,'object_selected']) or pd.isna(max_data.loc[max_upload_number,'emotion_selected'])\
+         or pd.isna(max_data.loc[max_upload_number,'action_selected']) or pd.isna(max_data.loc[max_upload_number,'setting_selected']):
     st.write("Not everyone has chosen words for their selected Category. Please return when that is done!")
     st.write('For this story:')
     for category in categories:
