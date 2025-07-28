@@ -4,6 +4,8 @@ import tempfile
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
+import base64
+import pickle
 
 st.set_page_config(page_icon = '🌌')
 
@@ -15,20 +17,23 @@ password = 'Toto'
 SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-e61ccb85d72c.json'  # Upload this to your app directory
 FOLDER_ID = '1zZtfu-f6EyD93gTUOhNgY2K7ofYEOPaU'  # The ID of the shared Google Drive folder
 
-@st.cache_resource
-def get_drive_service():
-    # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=['https://www.googleapis.com/auth/drive']
-    # )
-    # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=['https://www.googleapis.com/auth/drive']
-    )
+token_bytes = base64.b64decode(st.secrets["drive_oauth"]['credentials'])
+creds = pickle.loads(token_bytes)
 
-    return build('drive', 'v3', credentials=creds)
+# @st.cache_resource
+# def get_drive_service():
+#     # Uncomment for Local Development
+#     # creds = service_account.Credentials.from_service_account_file(
+#     #     SERVICE_ACCOUNT_FILE,
+#     #     scopes=['https://www.googleapis.com/auth/drive']
+#     # )
+#     # Uncomment for Deployed
+#     creds = service_account.Credentials.from_service_account_info(
+#         st.secrets["gcp_service_account"],
+#         scopes=['https://www.googleapis.com/auth/drive']
+#     )
+#
+#     return build('drive', 'v3', credentials=creds)
 
 # Streamlit UI
 st.title("Upload Your Story Anonymously Here")
@@ -55,7 +60,7 @@ if uploaded_file:
                 temp_file_path = tmp_file.name
 
             try:
-                service = get_drive_service()
+                service = build('drive', 'v3', credentials=creds)
                 file_metadata = {
                     'name': uploaded_file.name,
                     'parents': [FOLDER_ID]
