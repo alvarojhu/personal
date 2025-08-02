@@ -14,12 +14,14 @@ if "submit_story" not in st.session_state:
 password = 'Toto'
 
 # Set up credentials and Drive API
-SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-e61ccb85d72c.json'  # Upload this to your app directory
+# SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-e61ccb85d72c.json'  # No longer using service account
 FOLDER_ID = '1zZtfu-f6EyD93gTUOhNgY2K7ofYEOPaU'  # The ID of the shared Google Drive folder
 
+# pull in access token for personal upload
 token_bytes = base64.b64decode(st.secrets["drive_oauth"]['credentials'])
 creds = pickle.loads(token_bytes)
 
+# previously used for service account upload
 # @st.cache_resource
 # def get_drive_service():
 #     # Uncomment for Local Development
