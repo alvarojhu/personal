@@ -64,7 +64,7 @@ def shuffle_avoiding_fixed_points(prev, members):
             return new
 
 def main():
-    st.title("Category Generator")
+    st.title("Generate Your Story")
 
     odds_500 = 0.1
     odds_1000 = 0.2
