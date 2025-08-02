@@ -24,15 +24,15 @@ WORKSHEET_NAME = 'generated'  # Usually Sheet1 unless renamed
 @st.cache_resource
 def connect_to_gsheet():
     # Uncomment for Local Development
-    creds = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
-        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    )
-    # Uncomment for Deployed
-    # creds = service_account.Credentials.from_service_account_info(
-    #     st.secrets["gcp_service_account"],
+    # creds = service_account.Credentials.from_service_account_file(
+    #     SERVICE_ACCOUNT_FILE,
     #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
     # )
+    # Uncomment for Deployed
+    creds = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(WORKSHEET_NAME)
