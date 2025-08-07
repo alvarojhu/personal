@@ -9,6 +9,7 @@ import gspread
 from google.oauth2 import service_account
 
 st.set_page_config(page_icon = '🌌')
+
 # Initializing values
 parent_folder = Path(__file__).parent.parent
 columns_to_get = ['upload_number','upload_date','object','action','emotion','setting','word_count','due_date']
@@ -18,35 +19,25 @@ password = 'Toto'
 # Set up credentials and Drive API
 SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-e61ccb85d72c.json'  # Upload this to your app directory
 SHEET_NAME = 'data'
-WORKSHEET_NAME = 'generated'  # Usually Sheet1 unless renamed
+WORKSHEET_NAME_GEN = 'generated'  # Usually Sheet1 unless renamed
+WORKSHEET_NAME_READY = 'readyup'
 
 # Auth and connect
 @st.cache_resource
-def connect_to_gsheet():
+def connect_to_gsheet(worksheet_name):
     # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    # )
-    # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
         scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
     )
+    # Uncomment for Deployed
+    # creds = service_account.Credentials.from_service_account_info(
+    #     st.secrets["gcp_service_account"],
+    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    # )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
-    return sh.worksheet(WORKSHEET_NAME)
-
-sheet = connect_to_gsheet()
-
-# Read as DataFrame
-data = sheet.get_all_records()
-categories_df = pd.DataFrame(data)[columns_to_get]
-
-max_upload = categories_df.upload_number.max()
-
-if "click_save" not in st.session_state:
-    st.session_state.click_save = False
+    return sh.worksheet(worksheet_name)
 
 def get_image_download_link(img_path):
     with open(img_path, "rb") as f:
@@ -63,9 +54,29 @@ def shuffle_avoiding_fixed_points(prev, members):
         if all(a != b for a, b in zip(new, prev)):
             return new
 
+# Connecting to Google Sheet
+sheet_gen = connect_to_gsheet(WORKSHEET_NAME_GEN)
+sheet_ready = connect_to_gsheet(WORKSHEET_NAME_READY)
+
+# Read as DataFrame
+generated_data = sheet_gen.get_all_records()
+categories_df = pd.DataFrame(generated_data)[columns_to_get]
+
+data_ready = sheet_ready.get_all_records()
+ready_df = pd.DataFrame(data_ready)
+
+max_upload = categories_df.upload_number.max()
+
+st.write(ready_df)
+
 def main():
+    # initializing variables
+    if "click_save" not in st.session_state:
+        st.session_state.click_save = False
+
     st.title("Generate Your Story")
 
+    # setting the story length odds
     odds_500 = 0.1
     odds_1000 = 0.2
     odds_1500 = 0.35
@@ -82,6 +93,7 @@ def main():
 
     image = 'gifs/tars.gif'
 
+    # setting the chosen categories to blank if randomize hasn't been hit yet
     if 'object' not in st.session_state:
         for category in categories:
             st.session_state[category] = ''
@@ -92,15 +104,18 @@ def main():
 
         st.session_state.message = "Update"
 
+        # gets the previous list of categories and who chose them, so that the new list doesn't repeat
         prev = []
         for category in categories:
             prev.append(categories_df.loc[max_upload, category])
 
         new_list = shuffle_avoiding_fixed_points(prev, member_list)
 
+        # sets the session states for each category to the chosen member
         for category, i in zip(categories, np.arange(0,len(new_list))):
             st.session_state[category] = new_list[i]
 
+        # sets the word_count session state depending on what random number has been generated
         rand = np.random.random()
         if rand < odds_500:
             st.session_state.word_count = 500
@@ -121,6 +136,7 @@ def main():
             st.session_state.word_count = 3000
             image = 'gifs/crying.gif'
 
+        # calculated the due date based on the word length
         days_to_add = dt.timedelta(days=(st.session_state.word_count/100)+1)
 
         due_date = dt.date.today() + days_to_add
@@ -129,6 +145,7 @@ def main():
     c1,c2 = st.columns(2)
     with (c1):
 
+        # printing categories and who is selecting (or nothing)
         st.write('Object / Noun: {}'.format(st.session_state.object))
 
         st.write('Emotion: {}'.format(st.session_state.emotion))
@@ -153,7 +170,7 @@ def main():
                            'setting': st.session_state.setting, 'word_count': st.session_state.word_count,
                            'due_date':st.session_state.due_date}
                 try:
-                    sheet.append_row([str(value) for value in new_row.values()])
+                    sheet_gen.append_row([str(value) for value in new_row.values()])
                     st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
                     st.session_state.click_save = False
                 except Exception as e:
