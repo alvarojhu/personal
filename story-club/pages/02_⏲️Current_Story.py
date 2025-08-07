@@ -21,15 +21,15 @@ WORKSHEET_NAME_READY = 'readyup'
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
     # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    # )
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
+        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    )
     # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
-            st.secrets["gcp_service_account"],
-            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-        )
+    # creds = service_account.Credentials.from_service_account_info(
+    #         st.secrets["gcp_service_account"],
+    #         scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    #     )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(worksheet_name)
@@ -133,7 +133,28 @@ else:
             sheet_ready.update_cell(2, update_col, 0)
         update_col = get_col_number(sheet_ready, 'story_end')
         sheet_ready.update_cell(2, update_col, str(dt.date.today()))
-
+    c1, c2, c3, c4 = st.columns(4)
+    st.write()
+    with c1:
+        if sum_flags >= 1:
+            st.header('🚩')
+        else:
+            st.write('')
+    with c2:
+        if sum_flags >= 2:
+            st.header('🚩')
+        else:
+            st.write('')
+    with c3:
+        if sum_flags >= 3:
+            st.header('🚩')
+        else:
+            st.write('')
+    with c4:
+        if sum_flags >= 4:
+            st.header('🚩')
+        else:
+            st.write('')
 
 
 
