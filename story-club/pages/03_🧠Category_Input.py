@@ -114,6 +114,7 @@ if cat_selection:
 
                 st.write('Word Saved! Check the "Current Story" tab once everyone is done submitting their word.')
                 st.session_state.save_word = False
+                st.rerun()
             else:
                 st.write('Incorrect Password. Try Again')
 
