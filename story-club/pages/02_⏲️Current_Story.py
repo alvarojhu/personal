@@ -21,15 +21,15 @@ WORKSHEET_NAME_READY = 'readyup'
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
     # Uncomment for Local Development
-    creds = service_account.Credentials.from_service_account_file(
-        SERVICE_ACCOUNT_FILE,
-        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    )
+    # creds = service_account.Credentials.from_service_account_file(
+    #     SERVICE_ACCOUNT_FILE,
+    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    # )
     # Uncomment for Deployed
-    # creds = service_account.Credentials.from_service_account_info(
-    #         st.secrets["gcp_service_account"],
-    #         scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    #     )
+    creds = service_account.Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"],
+            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+        )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(worksheet_name)
@@ -45,6 +45,23 @@ def get_col_number(sheet, column_name, header_row=1):
         return headers.index(column_name) + 1
     except ValueError:
         raise KeyError(f"Column '{column_name}' not found in header row")
+
+def print_prev_stories(df):
+    """
+    prints out a table of previous story selections
+    :param df: joined_df
+    :return: df of previous stories
+    """
+    with st.expander('Click to Show Previous Choices'):
+        prev_df = pd.DataFrame()
+        prev_df['upload_number'] = df['upload_number']
+        prev_df['due_date'] = df['due_date']
+        prev_df['word_count'] = df['word_count']
+
+        for category in categories:
+            prev_df[category] = df[f'{category}_category'].astype(str) + " : " + df[f'{category}_selected'].astype(str)
+
+        return st.table(prev_df[prev_df['upload_number'] != max_upload_number])
 
 # Importing and saving Google Sheets
 sheet_gen = connect_to_gsheet(WORKSHEET_NAME_GEN)
@@ -105,19 +122,10 @@ if days_left.days >= 0:
                                                              max_data.loc[max_upload_number,f'{category}_selected'].capitalize(),
                                                              category.capitalize()))
 
+    print_prev_stories(joined)
 
-    with st.expander('Click to Show Previous Choices'):
-        prev_df = pd.DataFrame()
-        prev_df['upload_number'] = joined['upload_number']
-        prev_df['due_date'] = joined['due_date']
-        prev_df['word_count'] = joined['word_count']
-
-        for category in categories:
-            prev_df[category] = joined[f'{category}_category'].astype(str) + " : " + joined[f'{category}_selected'].astype(str)
-
-        st.table(prev_df[prev_df['upload_number'] != max_upload_number])
 else:
-    st.header("Ready Up to get started on your next story!")
+    st.header("Head to the Generator Page to Ready Up")
     member_list = [x for x in ready_df.columns if x != 'story_end']
     member_count = len(member_list)
     sum_flags = 0
@@ -139,22 +147,25 @@ else:
         if sum_flags >= 1:
             st.header('🚩')
         else:
-            st.write('')
+            st.write('❌')
     with c2:
         if sum_flags >= 2:
             st.header('🚩')
         else:
-            st.write('')
+            st.write('❌')
     with c3:
         if sum_flags >= 3:
             st.header('🚩')
         else:
-            st.write('')
+            st.write('❌')
     with c4:
         if sum_flags >= 4:
             st.header('🚩')
         else:
-            st.write('')
+            st.write('❌')
+
+    print_prev_stories(joined)
+
 
 
 
