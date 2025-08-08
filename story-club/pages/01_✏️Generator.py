@@ -197,6 +197,7 @@ def main():
                         sheet_gen.append_row([str(value) for value in new_row.values()])
                         st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
                         st.session_state.click_save = False
+                        st.rerun()
                     except Exception as e:
                         st.error(f"Failed to add row: {e}")
 
@@ -243,6 +244,7 @@ def main():
                 sheet_ready.update_cell(2, update_col, 1)
                 st.write(f'Thanks for Readying Up {member_select}')
                 st.session_state.ready = False # reset session state
+                st.rerun() # re-run the page so that the flag pops up
             else:
                 st.write('Incorrect Password. Try Again')
 
