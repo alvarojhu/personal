@@ -27,15 +27,15 @@ WORKSHEET_NAME_MEMBERS = 'members'
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
     # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    # )
-    # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
         scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
     )
+    # Uncomment for Deployed
+    # creds = service_account.Credentials.from_service_account_info(
+    #     st.secrets["gcp_service_account"],
+    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    # )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(worksheet_name)
@@ -95,7 +95,52 @@ for member in member_list:
     sum_flags += ready_df.loc[0, member]
 
 def main():
-    if sum_flags == len(member_list):
+    st.write(ready_df)
+    if (days_left.days < 0) and (sum_flags<len(member_list)):
+        # initializing variables
+        if "ready" not in st.session_state:
+            st.session_state.ready = False
+
+        st.header('Ready Up to Get Started on your Next Story!')
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            if sum_flags >= 1:
+                st.header('🚩')
+            else:
+                st.write('❌')
+        with c2:
+            if sum_flags >= 2:
+                st.header('🚩')
+            else:
+                st.write('❌')
+        with c3:
+            if sum_flags >= 3:
+                st.header('🚩')
+            else:
+                st.write('❌')
+        with c4:
+            if sum_flags >= 4:
+                st.header('🚩')
+            else:
+                st.write('❌')
+        member_select = st.selectbox(options = member_list, label = 'Ready Up')
+        if st.button("I'm Ready"):
+            st.session_state.ready = True
+        if st.session_state.ready:
+            user_pass = st.text_input('Enter Password')
+            if user_pass == '':
+                pass
+            elif user_pass == password:
+                update_col = get_col_number(sheet_ready, member_select)
+                sheet_ready.update_cell(2, update_col, 1)
+                st.write(f'Thanks for Readying Up {member_select}')
+                st.session_state.ready = False # reset session state
+                st.rerun() # re-run the page so that the flag pops up
+            else:
+                st.write('Incorrect Password. Try Again')
+    
+    else:
+        # sum_flags == len(member_list):
         # initializing variables
         if "click_save" not in st.session_state:
             st.session_state.click_save = False
@@ -205,48 +250,7 @@ def main():
                     st.write('Incorrect Password. Try Again')
         with c2:
             st.markdown(get_image_download_link(parent_folder / image), unsafe_allow_html=True)
-    else:
-        # initializing variables
-        if "ready" not in st.session_state:
-            st.session_state.ready = False
-
-        st.header('Ready Up to Get Started on your Next Story!')
-        c1, c2, c3, c4 = st.columns(4)
-        with c1:
-            if sum_flags >= 1:
-                st.header('🚩')
-            else:
-                st.write('❌')
-        with c2:
-            if sum_flags >= 2:
-                st.header('🚩')
-            else:
-                st.write('❌')
-        with c3:
-            if sum_flags >= 3:
-                st.header('🚩')
-            else:
-                st.write('❌')
-        with c4:
-            if sum_flags >= 4:
-                st.header('🚩')
-            else:
-                st.write('❌')
-        member_select = st.selectbox(options = member_list, label = 'Ready Up')
-        if st.button("I'm Ready"):
-            st.session_state.ready = True
-        if st.session_state.ready:
-            user_pass = st.text_input('Enter Password')
-            if user_pass == '':
-                pass
-            elif user_pass == password:
-                update_col = get_col_number(sheet_ready, member_select)
-                sheet_ready.update_cell(2, update_col, 1)
-                st.write(f'Thanks for Readying Up {member_select}')
-                st.session_state.ready = False # reset session state
-                st.rerun() # re-run the page so that the flag pops up
-            else:
-                st.write('Incorrect Password. Try Again')
+        
 
 if __name__ == '__main__':
     main()
