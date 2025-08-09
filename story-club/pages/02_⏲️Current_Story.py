@@ -63,9 +63,9 @@ if max_upload_number not in (selected_df.upload_number):
     sheet_chose.append_row([str(value) for value in new_row.values()])
 
 st.header(f'You have {days_left.days} days left to write your story!')
-st.subheader(f'Your story is due {max_data.loc[max_upload_number, 'due_date']} and '
-             f'should be between {round(max_data.loc[max_upload_number, 'word_count']-max_data.loc[max_upload_number, 'word_count']/10)} and'
-             f' {round(max_data.loc[max_upload_number, 'word_count']+max_data.loc[max_upload_number, 'word_count']/10)} words long')
+st.subheader(f"Your story is due {max_data.loc[max_upload_number, 'due_date']} and "
+             f"should be between {round(max_data.loc[max_upload_number, 'word_count']-max_data.loc[max_upload_number, 'word_count']/10)} and"
+             f" {round(max_data.loc[max_upload_number, 'word_count']+max_data.loc[max_upload_number, 'word_count']/10)} words long")
 
 if max_data.loc[max_upload_number,'object_selected'] == '' or max_data.loc[max_upload_number,'emotion_selected'] == ''\
          or max_data.loc[max_upload_number,'action_selected'] == '' or max_data.loc[max_upload_number,'setting_selected'] == '':
