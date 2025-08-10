@@ -250,7 +250,6 @@ def main():
                     st.write('Incorrect Password. Try Again')
         with c2:
             st.markdown(get_image_download_link(parent_folder / image), unsafe_allow_html=True)
-        
 
 if __name__ == '__main__':
     main()
