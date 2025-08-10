@@ -21,15 +21,15 @@ WORKSHEET_NAME_READY = 'readyup'
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
     # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    # )
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE,
+        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    )
     # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
-            st.secrets["gcp_service_account"],
-            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-        )
+    # creds = service_account.Credentials.from_service_account_info(
+    #         st.secrets["gcp_service_account"],
+    #         scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+    #     )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(worksheet_name)
@@ -78,6 +78,9 @@ ready_df = pd.DataFrame(data_ready)
 
 today = dt.date.today()
 
+member_list = [x for x in ready_df.columns if x != 'story_end']
+member_count = len(member_list)
+
 joined = categories_df.join(selected_df, lsuffix = '_category', rsuffix = '_selected', on = 'upload_number')
 
 # Getting data for the latest story
@@ -97,6 +100,9 @@ if max_upload_number not in (selected_df.upload_number):
     sheet_chose.append_row([str(value) for value in new_row.values()])
 
 if days_left.days >= 0:
+    for member in member_list:
+        update_col = get_col_number(sheet_ready, member)
+        sheet_ready.update_cell(2, update_col, 0)
     st.header(f'You have {days_left.days} days left to write your story!')
     st.subheader(f"Your story is due {max_data.loc[max_upload_number, 'due_date']} and "
                  f"should be between {round(max_data.loc[max_upload_number, 'word_count']-max_data.loc[max_upload_number, 'word_count']/10)} and"
@@ -126,21 +132,13 @@ if days_left.days >= 0:
 
 else:
     st.header("Head to the Generator Page to Ready Up")
-    member_list = [x for x in ready_df.columns if x != 'story_end']
-    member_count = len(member_list)
     sum_flags = 0
     for member in member_list:
         sum_flags += ready_df.loc[0, member]
 
     # Reset the ready flags ONLY if the last due date is after the last time it was reset (to prevent resetting mid story),
     # the due date is already past, and if all flags are 1
-    if (ready_df.loc[0, 'story_end'] < max_data.loc[max_upload_number, 'due_date']) & \
-        (days_left.days < 0) & (member_count == sum_flags):
-        for member in member_list:
-            update_col = get_col_number(sheet_ready, member)
-            sheet_ready.update_cell(2, update_col, 0)
-        update_col = get_col_number(sheet_ready, 'story_end')
-        sheet_ready.update_cell(2, update_col, str(dt.date.today()))
+    
     c1, c2, c3, c4 = st.columns(4)
     st.write()
     with c1:
