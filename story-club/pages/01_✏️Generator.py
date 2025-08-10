@@ -95,7 +95,6 @@ for member in member_list:
     sum_flags += ready_df.loc[0, member]
 
 def main():
-    st.write(ready_df)
     if (days_left.days < 0) and (sum_flags<len(member_list)):
         # initializing variables
         if "ready" not in st.session_state:
