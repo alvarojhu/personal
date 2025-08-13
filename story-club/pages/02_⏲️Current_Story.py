@@ -136,9 +136,6 @@ else:
     for member in member_list:
         sum_flags += ready_df.loc[0, member]
 
-    # Reset the ready flags ONLY if the last due date is after the last time it was reset (to prevent resetting mid story),
-    # the due date is already past, and if all flags are 1
-    
     c1, c2, c3, c4 = st.columns(4)
     st.write()
     with c1:
