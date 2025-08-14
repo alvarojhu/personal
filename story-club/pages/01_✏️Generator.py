@@ -23,6 +23,15 @@ WORKSHEET_NAME_GEN = 'generated'  # Usually Sheet1 unless renamed
 WORKSHEET_NAME_READY = 'readyup'
 WORKSHEET_NAME_MEMBERS = 'members'
 
+# determining environment
+try:
+    # pull either prod or staging
+    ENV = st.secrets('APP_ENV')
+except Exception:
+    # if local development, use local
+    ENV = 'dev'
+st.write(f'Running in {ENV} mode')
+
 # Auth and connect
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
