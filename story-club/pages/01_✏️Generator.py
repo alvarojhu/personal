@@ -171,90 +171,54 @@ def main():
             st.session_state.save_probs = False
 
         # initializing word lengths and probabilities
-        st.session_state.odds_0_length = lengths_df.loc[0, 'word_count']
-        st.session_state.odds_0_prob = lengths_df.loc[0, 'probability']
-        st.session_state.odds_1_length = lengths_df.loc[1, 'word_count']
-        st.session_state.odds_1_prob = lengths_df.loc[1, 'probability']
-        st.session_state.odds_2_length = lengths_df.loc[2, 'word_count']
-        st.session_state.odds_2_prob = lengths_df.loc[2, 'probability']
-        st.session_state.odds_3_length = lengths_df.loc[3, 'word_count']
-        st.session_state.odds_3_prob = lengths_df.loc[3, 'probability']
-        st.session_state.odds_4_length = lengths_df.loc[4, 'word_count']
-        st.session_state.odds_4_prob = lengths_df.loc[4, 'probability']
-        st.session_state.odds_5_length = lengths_df.loc[5, 'word_count']
-        st.session_state.odds_5_prob = lengths_df.loc[5, 'probability']
+        for i in range(6):
+            globals()[f"st.session_state.odds_{i}_length"] =lengths_df.loc[i, 'word_count']
+            globals()[f"st.session_state.odds_{i}_prob"] =lengths_df.loc[i, 'probability']
 
         st.title("Generate Your Story")
 
         # setting the story lengths and odds as variables
-        length_0 = st.session_state.odds_0_length
-        length_1 = st.session_state.odds_1_length
-        length_2 = st.session_state.odds_2_length
-        length_3 = st.session_state.odds_3_length
-        length_4 = st.session_state.odds_4_length
-        length_5 = st.session_state.odds_5_length
+        for i in range(6):
+            globals()[f"length_{i}"] = globals()[f"st.session_state.odds_{i}_length"]
+            globals()[f"odds_{i}"] = globals()[f"st.session_state.odds_{i}_prob"]
 
-        odds_0 = st.session_state.odds_0_prob
-        odds_1 = st.session_state.odds_1_prob
-        odds_2 = st.session_state.odds_2_prob
-        odds_3 = st.session_state.odds_3_prob
-        odds_4 = st.session_state.odds_4_prob
-        odds_5 = st.session_state.odds_5_prob
-
-        st.info(f'Current odds of story length are {odds_0}% for {length_0} words, {odds_1}% for {length_1},  '
+        st.info(f'Current story length odds are {odds_0}% for {length_0} words, {odds_1}% for {length_1},  '
                 f'{odds_2}% for {length_2}, {odds_3}% for {length_3} words, {odds_4}% for {length_4}, and {odds_5}% for {length_5} words. '
                 'There are 5 Days assigned per 100 words of story selected. ')
 
         if st.button('Update Story Length Probabilities'):
             st.session_state.update_probabilities = True
         if st.session_state.update_probabilities:
+            # creating the input boxes for categories
             row1 = st.columns(6)
-            with row1[0]:
-                length_0_updated = st.number_input('Word Length 1', value=length_0)
-            with row1[1]:
-                length_1_updated = st.number_input('Word Length 2', value=length_1)
-            with row1[2]:
-                length_2_updated = st.number_input('Word Length 3', value=length_2)
-            with row1[3]:
-                length_3_updated = st.number_input('Word Length 4', value=length_3)
-            with row1[4]:
-                length_4_updated = st.number_input('Word Length 5', value=length_4)
-            with row1[5]:
-                length_5_updated = st.number_input('Word Length 6', value=length_5)
+            for i in range(6):
+                with row1[i]:
+                    globals()[f"length_{i}_updated"] = st.number_input(f'Word Length {i}', value=globals()[f"length_{i}"])
 
-            updated_lengths = [length_0_updated, length_1_updated, length_2_updated, length_3_updated,
-                              length_4_updated, length_5_updated]
-            original_lengths = [length_0, length_1, length_2, length_3, length_4, length_5]
+            updated_lengths = [globals()[f"length_{i}_updated"] for i in range(6)]
+            original_lengths = [globals()[f"length_{i}"] for i in range(6)]
 
             row2 = st.columns(6)
-            with row2[0]:
-                odds_0_updated = st.number_input('Probability 1 (%)', value=odds_0)
-            with row2[1]:
-                odds_1_updated = st.number_input('Probability 2 (%)', value=odds_1)
-            with row2[2]:
-                odds_2_updated = st.number_input('Probability 3 (%)', value=odds_2)
-            with row2[3]:
-                odds_3_updated = st.number_input('Probability 4 (%)', value=odds_3)
-            with row2[4]:
-                odds_4_updated = st.number_input('Probability 5 (%)', value=odds_4)
-            with row2[5]:
-                odds_5_updated = st.number_input('Probability 6 (%)', value=odds_5)
+            for i in range(6):
+                with row2[i]:
+                    globals()[f"odds_{i}_updated"] = st.number_input(f'Probability {i} (%)', value=globals()[f"odds_{i}"])
 
-            updated_odds = [odds_0_updated, odds_1_updated, odds_2_updated, odds_3_updated,
-                            odds_4_updated, odds_5_updated]
-            original_odds = [odds_0, odds_1, odds_2, odds_3, odds_4, odds_5]
+            updated_odds = [globals()[f"odds_{i}_updated"] for i in range(6)]
+            original_odds = [globals()[f"odds_{i}"] for i in range(6)]
 
             c1, c2, c3, c4, c5, c6 = st.columns(6)
             with c1:
                 if st.button('Save'):
                     st.session_state.save_probs = True
             if st.session_state.save_probs:
+                # odds must add to 100
                 if sum(updated_odds) != 100:
                     remaining = 100 - sum(updated_odds)
                     if remaining > 0:
                         st.write(f"Probabilities must add to 100. Add {remaining} to your probabilities.")
                     else:
                         st.write(f"Probabilities must add to 100. Subtract {remaining} from your probabilities.")
+                # if odds are correct, update the spreadsheet values with new ones
                 else:
                     for row, updated, original in zip(list(range(2,8)),updated_lengths, original_lengths):
                         if updated != original:
