@@ -21,6 +21,7 @@ SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-e61ccb85d72c.json'  # Upload this to
 WORKSHEET_NAME_GEN = 'generated'  # Usually Sheet1 unless renamed
 WORKSHEET_NAME_READY = 'readyup'
 WORKSHEET_NAME_MEMBERS = 'members'
+WORKSHEET_NAME_LENGTHS = 'story_lengths'
 
 # determining environment
 try:
@@ -83,6 +84,7 @@ def get_col_number(sheet, column_name, header_row=1):
 sheet_gen = connect_to_gsheet(WORKSHEET_NAME_GEN)
 sheet_ready = connect_to_gsheet(WORKSHEET_NAME_READY)
 sheet_members = connect_to_gsheet(WORKSHEET_NAME_MEMBERS)
+sheet_lengths = connect_to_gsheet(WORKSHEET_NAME_LENGTHS)
 
 # Read as DataFrame
 generated_data = sheet_gen.get_all_records()
@@ -93,6 +95,9 @@ ready_df = pd.DataFrame(data_ready)
 
 data_members = sheet_members.get_all_records()
 members_df = pd.DataFrame(data_members)
+
+data_lengths = sheet_lengths.get_all_records()
+lengths_df = pd.DataFrame(data_lengths)
 
 member_list = list(members_df['member'].values)
 
@@ -160,21 +165,76 @@ def main():
         # initializing variables
         if "click_save" not in st.session_state:
             st.session_state.click_save = False
+        if "update_probabilities" not in st.session_state:
+            st.session_state.update_probabilities = False
+        if "save_probs" not in st.session_state:
+            st.session_state.save_probs = False
+
+        # initializing word lengths and probabilities
+        for i in range(6):
+            globals()[f"st.session_state.odds_{i}_length"] =lengths_df.loc[i, 'word_count']
+            globals()[f"st.session_state.odds_{i}_prob"] =lengths_df.loc[i, 'probability']
 
         st.title("Generate Your Story")
 
-        # setting the story length odds
-        odds_500 = 0.1
-        odds_1000 = 0.2
-        odds_1500 = 0.35
-        odds_2000 = 0.2
-        odds_2500 = 0.1
-        odds_3000 = 0.05
+        # setting the story lengths and odds as variables
+        for i in range(6):
+            globals()[f"length_{i}"] = globals()[f"st.session_state.odds_{i}_length"]
+            globals()[f"odds_{i}"] = globals()[f"st.session_state.odds_{i}_prob"]
 
-        with st.expander('Story Length Odds'):
-            st.info(f'Odds of story length are {odds_500*100}% for 500 words, {odds_1000*100}% for 1000,  '
-                    f'{odds_1500*100}% for 1500, {odds_2000*100}% for 2000 words, {odds_2500*100}% for 2500, and {odds_3000*100}% for 3000 words. '
-                    'There are 5 Days assigned per 100 words of story selected. ')
+        st.info(f'Current story length odds are {odds_0}% for {length_0} words, {odds_1}% for {length_1},  '
+                f'{odds_2}% for {length_2}, {odds_3}% for {length_3} words, {odds_4}% for {length_4}, and {odds_5}% for {length_5} words. '
+                'There are 5 Days assigned per 100 words of story selected. ')
+
+        if st.button('Update Story Length Probabilities'):
+            st.session_state.update_probabilities = True
+        if st.session_state.update_probabilities:
+            # creating the input boxes for categories
+            row1 = st.columns(6)
+            for i in range(6):
+                with row1[i]:
+                    globals()[f"length_{i}_updated"] = st.number_input(f'Word Length {i}', value=globals()[f"length_{i}"])
+
+            updated_lengths = [globals()[f"length_{i}_updated"] for i in range(6)]
+            original_lengths = [globals()[f"length_{i}"] for i in range(6)]
+
+            row2 = st.columns(6)
+            for i in range(6):
+                with row2[i]:
+                    globals()[f"odds_{i}_updated"] = st.number_input(f'Probability {i} (%)', value=globals()[f"odds_{i}"])
+
+            updated_odds = [globals()[f"odds_{i}_updated"] for i in range(6)]
+            original_odds = [globals()[f"odds_{i}"] for i in range(6)]
+
+            c1, c2, c3, c4, c5, c6 = st.columns(6)
+            with c1:
+                if st.button('Save'):
+                    st.session_state.save_probs = True
+            if st.session_state.save_probs:
+                # odds must add to 100
+                if sum(updated_odds) != 100:
+                    remaining = 100 - sum(updated_odds)
+                    if remaining > 0:
+                        st.write(f"Probabilities must add to 100. Add {remaining} to your probabilities.")
+                    else:
+                        st.write(f"Probabilities must add to 100. Subtract {remaining} from your probabilities.")
+                # if odds are correct, update the spreadsheet values with new ones
+                else:
+                    for row, updated, original in zip(list(range(2,8)),updated_lengths, original_lengths):
+                        if updated != original:
+                            update_col = get_col_number(sheet_lengths, 'word_count')
+                            sheet_lengths.update_cell(row, update_col, updated)
+                            st.write(f"Word Count {original} replaced with {updated}.")
+                    for row, updated, original in zip(list(range(2,8)),updated_odds, original_odds):
+                        if updated != original:
+                            update_col = get_col_number(sheet_lengths, 'probability')
+                            sheet_lengths.update_cell(row, update_col, updated)
+                            st.write(f"Probability {original} replaced with {updated}.")
+                    st.write('Press Close to Generate your story with these Probabilities.')
+            with c2:
+                if st.button('Close'):
+                    st.session_state.update_probabilities = False
+                    st.rerun()
 
         image = 'gifs/tars.gif'
 
@@ -185,87 +245,88 @@ def main():
             st.session_state.word_count = 0
             st.session_state.due_date = dt.date.today()
 
-        if st.button('Randomize'):
+        if not st.session_state.update_probabilities:
+            if st.button('Randomize'):
 
-            st.session_state.message = "Update"
+                st.session_state.message = "Update"
 
-            # gets the previous list of categories and who chose them, so that the new list doesn't repeat
-            prev = []
-            for category in categories:
-                prev.append(categories_df.loc[max_upload, category])
+                # gets the previous list of categories and who chose them, so that the new list doesn't repeat
+                prev = []
+                for category in categories:
+                    prev.append(categories_df.loc[max_upload, category])
 
-            new_list = shuffle_avoiding_fixed_points(prev, member_list)
+                new_list = shuffle_avoiding_fixed_points(prev, member_list)
 
-            # sets the session states for each category to the chosen member
-            for category, i in zip(categories, np.arange(0,len(new_list))):
-                st.session_state[category] = new_list[i]
+                # sets the session states for each category to the chosen member
+                for category, i in zip(categories, np.arange(0,len(new_list))):
+                    st.session_state[category] = new_list[i]
 
-            # sets the word_count session state depending on what random number has been generated
-            rand = np.random.random()
-            if rand < odds_500:
-                st.session_state.word_count = 500
-                image = 'gifs/blackhole.gif'
-            elif rand >= odds_500 and rand < odds_500 + odds_1000:
-                st.session_state.word_count = 1000
-                image = 'gifs/necessary.gif'
-            elif rand >= odds_500 + odds_1000 and rand < odds_500 + odds_1000 + odds_1500:
-                st.session_state.word_count = 1500
-                image = 'gifs/yes.gif'
-            elif rand >= odds_500 + odds_1000 + odds_1500 and rand < odds_500 + odds_1000 + odds_1500 + odds_2000:
-                st.session_state.word_count = 2000
-                image = 'gifs/humor.gif'
-            elif rand >= odds_500 + odds_1000 + odds_1500 + odds_2000 and rand < odds_500 + odds_1000 + odds_1500 + odds_2000 + odds_2500:
-                st.session_state.word_count = 2500
-                image = 'gifs/interstellar-cost.gif'
-            else:
-                st.session_state.word_count = 3000
-                image = 'gifs/crying.gif'
-
-            # calculated the due date based on the word length
-            days_to_add = dt.timedelta(days=(st.session_state.word_count/100)+1)
-
-            due_date = dt.date.today() + days_to_add
-            st.session_state.due_date = due_date
-
-        c1,c2 = st.columns(2)
-        with (c1):
-
-            # printing categories and who is selecting (or nothing)
-            st.write('Object / Noun: {}'.format(st.session_state.object))
-
-            st.write('Emotion: {}'.format(st.session_state.emotion))
-
-            st.write('Action / Verb: {}'.format(st.session_state.action))
-
-            st.write('Setting / Location: {}'.format(st.session_state.setting))
-
-            st.write(f"Word Count = {st.session_state.word_count} and it is due {st.session_state.due_date}")
-
-            st.warning('WARNING! Do not click "Save Categories" unless you are ready for the next story')
-            if st.button('Save Categories'):
-                st.session_state.click_save = True
-
-            if st.session_state.click_save:
-                user_pass = st.text_input('Enter Password')
-                if user_pass == '':
-                    pass
-                elif user_pass == password:
-                    new_row = {'upload_number':max_upload+1,'upload_date': dt.date.today(), 'object': st.session_state.object,
-                               'action': st.session_state.action, 'emotion': st.session_state.emotion,
-                               'setting': st.session_state.setting, 'word_count': st.session_state.word_count,
-                               'due_date':st.session_state.due_date}
-                    try:
-                        sheet_gen.append_row([str(value) for value in new_row.values()])
-                        st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
-                        st.session_state.click_save = False
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Failed to add row: {e}")
-
+                # sets the word_count session state depending on what random number has been generated
+                rand = np.random.random()*100
+                if rand < odds_0:
+                    st.session_state.word_count = length_0
+                    image = 'gifs/blackhole.gif'
+                elif rand >= odds_0 and rand < odds_0 + odds_1:
+                    st.session_state.word_count = length_1
+                    image = 'gifs/necessary.gif'
+                elif rand >= odds_0 + odds_1 and rand < odds_0 + odds_1 + odds_2:
+                    st.session_state.word_count = length_2
+                    image = 'gifs/yes.gif'
+                elif rand >= odds_0 + odds_1 + odds_2 and rand < odds_0 + odds_1 + odds_2 + odds_3:
+                    st.session_state.word_count = length_3
+                    image = 'gifs/humor.gif'
+                elif rand >= odds_0 + odds_1 + odds_2 + odds_3 and rand < odds_0 + odds_1 + odds_2 + odds_3 + odds_4:
+                    st.session_state.word_count = length_4
+                    image = 'gifs/interstellar-cost.gif'
                 else:
-                    st.write('Incorrect Password. Try Again')
-        with c2:
-            st.markdown(get_image_download_link(parent_folder / image), unsafe_allow_html=True)
+                    st.session_state.word_count = length_5
+                    image = 'gifs/crying.gif'
+
+                # calculated the due date based on the word length
+                days_to_add = dt.timedelta(days=(st.session_state.word_count/100)+1)
+
+                due_date = dt.date.today() + days_to_add
+                st.session_state.due_date = due_date
+
+            c1,c2 = st.columns(2)
+            with (c1):
+
+                # printing categories and who is selecting (or nothing)
+                st.write('Object / Noun: {}'.format(st.session_state.object))
+
+                st.write('Emotion: {}'.format(st.session_state.emotion))
+
+                st.write('Action / Verb: {}'.format(st.session_state.action))
+
+                st.write('Setting / Location: {}'.format(st.session_state.setting))
+
+                st.write(f"Word Count = {st.session_state.word_count} and it is due {st.session_state.due_date}")
+
+                st.warning('WARNING! Do not click "Save Categories" unless you are ready for the next story')
+                if st.button('Save Categories'):
+                    st.session_state.click_save = True
+
+                if st.session_state.click_save:
+                    user_pass = st.text_input('Enter Password')
+                    if user_pass == '':
+                        pass
+                    elif user_pass == password:
+                        new_row = {'upload_number':max_upload+1,'upload_date': dt.date.today(), 'object': st.session_state.object,
+                                   'action': st.session_state.action, 'emotion': st.session_state.emotion,
+                                   'setting': st.session_state.setting, 'word_count': st.session_state.word_count,
+                                   'due_date':st.session_state.due_date}
+                        try:
+                            sheet_gen.append_row([str(value) for value in new_row.values()])
+                            st.write('Categories Saved! Check the Current Story tab to see how long you have left.')
+                            st.session_state.click_save = False
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Failed to add row: {e}")
+
+                    else:
+                        st.write('Incorrect Password. Try Again')
+            with c2:
+                st.markdown(get_image_download_link(parent_folder / image), unsafe_allow_html=True)
 
 if __name__ == '__main__':
     main()
