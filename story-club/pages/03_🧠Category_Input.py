@@ -13,25 +13,37 @@ from google.oauth2 import service_account
 
 # Set up credentials and Drive API
 SERVICE_ACCOUNT_FILE = 'psyched-axle-269916-e61ccb85d72c.json'  # Upload this to your app directory
-SHEET_NAME = 'data'
 WORKSHEET_NAME_GEN = 'generated'  # Usually Sheet1 unless renamed
 WORKSHEET_NAME_CHOSE = 'chosen'
+
+# determining environment
+try:
+    # pull either prod or staging
+    ENV = st.secrets['env']['APP_ENV']
+except Exception:
+    # if local development, use local
+    ENV = 'dev'
 
 # Auth and connect
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
-    # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    # )
-    # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    )
+    if ENV == 'dev':
+        creds = service_account.Credentials.from_service_account_file(
+            SERVICE_ACCOUNT_FILE,
+            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+        )
+        sheet_name = 'data_testing'
+    else:
+        creds = service_account.Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"],
+            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+        )
+        if ENV == 'staging':
+            sheet_name = 'data_testing'
+        else:
+            sheet_name = 'data'
     gc = gspread.authorize(creds)
-    sh = gc.open(SHEET_NAME)
+    sh = gc.open(sheet_name)
     return sh.worksheet(worksheet_name)
 
 sheet_gen = connect_to_gsheet(WORKSHEET_NAME_GEN)
