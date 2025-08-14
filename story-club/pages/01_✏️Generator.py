@@ -26,7 +26,7 @@ WORKSHEET_NAME_MEMBERS = 'members'
 # determining environment
 try:
     # pull either prod or staging
-    ENV = st.secrets('APP_ENV')
+    ENV = st.secrets['env']['APP_ENV']
 except Exception:
     # if local development, use local
     ENV = 'dev'
