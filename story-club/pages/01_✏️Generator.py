@@ -230,7 +230,7 @@ def main():
                             update_col = get_col_number(sheet_lengths, 'probability')
                             sheet_lengths.update_cell(row, update_col, updated)
                             st.write(f"Probability {original} replaced with {updated}.")
-                    st.write('Press Close to Generate your story with these Probabilities.')
+                    st.info('Press "Close" to continue to the Generator with these Probabilities.')
             with c2:
                 if st.button('Close'):
                     st.session_state.update_probabilities = False
