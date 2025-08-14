@@ -17,16 +17,24 @@ WORKSHEET_NAME_GEN = 'generated'  # Usually Sheet1 unless renamed
 WORKSHEET_NAME_CHOSE = 'chosen'
 WORKSHEET_NAME_READY = 'readyup'
 
+# determining environment
+try:
+    # pull either prod or staging
+    ENV = st.secrets['env']['APP_ENV']
+except Exception:
+    # if local development, use local
+    ENV = 'dev'
+
 # Auth and connect
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
-    # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    # )
-    # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
+    if ENV == 'dev':
+        creds = service_account.Credentials.from_service_account_file(
+            SERVICE_ACCOUNT_FILE,
+            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+        )
+    else:
+        creds = service_account.Credentials.from_service_account_info(
             st.secrets["gcp_service_account"],
             scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
         )
