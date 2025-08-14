@@ -26,25 +26,24 @@ WORKSHEET_NAME_MEMBERS = 'members'
 # determining environment
 try:
     # pull either prod or staging
-    ENV = st.secrets('APP_ENV')
+    ENV = st.secrets['env']['APP_ENV']
 except Exception:
     # if local development, use local
     ENV = 'dev'
-st.write(f'Running in {ENV} mode')
 
 # Auth and connect
 @st.cache_resource
 def connect_to_gsheet(worksheet_name):
-    # Uncomment for Local Development
-    # creds = service_account.Credentials.from_service_account_file(
-    #     SERVICE_ACCOUNT_FILE,
-    #     scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    # )
-    # Uncomment for Deployed
-    creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"],
-        scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
-    )
+    if ENV == 'dev':
+        creds = service_account.Credentials.from_service_account_file(
+            SERVICE_ACCOUNT_FILE,
+            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+        )
+    else:
+        creds = service_account.Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"],
+            scopes=[ "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/spreadsheets"]
+        )
     gc = gspread.authorize(creds)
     sh = gc.open(SHEET_NAME)
     return sh.worksheet(worksheet_name)
