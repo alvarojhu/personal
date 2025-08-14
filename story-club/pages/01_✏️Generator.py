@@ -137,9 +137,14 @@ def main():
                 st.rerun() # re-run the page so that the flag pops up
             else:
                 st.write('Incorrect Password. Try Again')
-    
+    elif days_left.days > 0:
+        # if there's a new story generated and the due date hasn't come yet
+        st.title("Current Story in Progress. View Current Story Tab for Details")
+        # Reset the flags to 0 if a new story was generated
+        for member in member_list:
+            update_col = get_col_number(sheet_ready, member)
+            sheet_ready.update_cell(2, update_col, 0)
     else:
-        # sum_flags == len(member_list):
         # initializing variables
         if "click_save" not in st.session_state:
             st.session_state.click_save = False
