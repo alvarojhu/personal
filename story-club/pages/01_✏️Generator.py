@@ -4,6 +4,7 @@ import pandas as pd
 import datetime as dt
 import random
 import base64
+import math
 from pathlib import Path
 import gspread
 from google.oauth2 import service_account
@@ -184,7 +185,7 @@ def main():
 
         st.info(f'Current story length odds are {odds_0}% for {length_0} words, {odds_1}% for {length_1},  '
                 f'{odds_2}% for {length_2}, {odds_3}% for {length_3} words, {odds_4}% for {length_4}, and {odds_5}% for {length_5} words. '
-                'There is 1 Day assigned per 100 words of story selected. ')
+                'There are 8 Days assigned per 1000 words of story selected. ')
 
         if st.button('Update Story Length Probabilities'):
             st.session_state.update_probabilities = True
@@ -283,7 +284,7 @@ def main():
                     image = 'gifs/crying.gif'
 
                 # calculated the due date based on the word length
-                days_to_add = dt.timedelta(days=(st.session_state.word_count/100)+1)
+                days_to_add = dt.timedelta(days=(math.ceil((st.session_state.word_count/1000)*8))+1)
 
                 due_date = dt.date.today() + days_to_add
                 st.session_state.due_date = due_date
