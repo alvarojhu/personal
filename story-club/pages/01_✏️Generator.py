@@ -184,7 +184,7 @@ def main():
 
         st.info(f'Current story length odds are {odds_0}% for {length_0} words, {odds_1}% for {length_1},  '
                 f'{odds_2}% for {length_2}, {odds_3}% for {length_3} words, {odds_4}% for {length_4}, and {odds_5}% for {length_5} words. '
-                'There are 5 Days assigned per 100 words of story selected. ')
+                'There is 1 Day assigned per 100 words of story selected. ')
 
         if st.button('Update Story Length Probabilities'):
             st.session_state.update_probabilities = True
